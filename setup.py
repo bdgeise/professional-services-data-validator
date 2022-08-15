@@ -37,7 +37,7 @@ dependencies = [
     "impyla==0.17.0",
     "SQLAlchemy==1.3.22",
     "PyMySQL==1.0.2",
-    "psycopg2-binary==2.8.6",
+    "psycopg2-binary==2.9.3",
     "PyYAML==5.4.1",
     "pandas==1.4.3",
     "proto-plus==1.13.0",
