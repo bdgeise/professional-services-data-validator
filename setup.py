@@ -39,7 +39,7 @@ dependencies = [
     "PyMySQL==1.0.2",
     "psycopg2-binary==2.8.6",
     "PyYAML==5.4.1",
-    "pandas==1.2.3",
+    "pandas==1.4.3",
     "proto-plus==1.13.0",
     "pyarrow==7.0.0",
     "pydata-google-auth==1.1.0",
