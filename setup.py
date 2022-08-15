@@ -41,7 +41,7 @@ dependencies = [
     "PyYAML==5.4.1",
     "pandas==1.2.3",
     "proto-plus==1.13.0",
-    "pyarrow==8.0.0",
+    "pyarrow==7.0.0",
     "pydata-google-auth==1.1.0",
     "google-cloud-bigquery==2.11.0",
     "google-cloud-bigquery-storage==2.3.0",
