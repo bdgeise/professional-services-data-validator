@@ -23,11 +23,11 @@ import ibis_bigquery
 import pandas
 import third_party.ibis.ibis_addon.datatypes
 from google.cloud import bigquery
-from ibis.backends.mysql.client import MySQLClient
-from ibis.backends.pandas.client import PandasClient
-from ibis.backends.postgres.client import PostgreSQLClient
-from third_party.ibis.ibis_cloud_spanner.api import connect as spanner_connect
-from third_party.ibis.ibis_impala.api import impala_connect
+import ibis.backends.mysql as MySQLClient
+import ibis.backends.pandas as PandasClient
+import ibis.backends.postgres as PostgreSQLClient
+import third_party.ibis.ibis_cloud_spanner as spanner_connect
+import third_party.ibis.ibis_impala as impala_connect
 
 from data_validation import client_info, consts, exceptions
 
@@ -58,26 +58,24 @@ def _raise_missing_client_error(msg):
 
 # If you have a Teradata License there is an optional teradatasql import
 try:
-    from third_party.ibis.ibis_teradata.client import TeradataClient
+    import third_party.ibis.ibis_teradata as TeradataClient
 except Exception:
     msg = "pip install teradatasql (requires Teradata licensing)"
     TeradataClient = _raise_missing_client_error(msg)
 
 # If you have an cx_Oracle driver installed
 try:
-    from third_party.ibis.ibis_oracle.client import OracleClient
+    import third_party.ibis.ibis_oracle as OracleClient
 except Exception:
     OracleClient = _raise_missing_client_error("pip install cx_Oracle")
 
 try:
-    from third_party.ibis.ibis_mssql.client import MSSQLClient
+    import third_party.ibis.ibis_mssql as MSSQLClient
 except Exception:
     MSSQLClient = _raise_missing_client_error("pip install pyodbc")
 
 try:
-    from third_party.ibis.ibis_snowflake.client import (
-        SnowflakeClient as snowflake_connect,
-    )
+    import third_party.ibis.ibis_snowflake as snowflake_connect
 except Exception:
     snowflake_connect = _raise_missing_client_error(
         "pip install snowflake-connector-python"
@@ -85,7 +83,7 @@ except Exception:
 
 # If you have Db2 client installed
 try:
-    from third_party.ibis.ibis_DB2.client import DB2Client
+    import third_party.ibis.ibis_DB2 as DB2Client
 except Exception:
     DB2Client = _raise_missing_client_error("pip install ibm_db_sa")
 
@@ -119,7 +117,7 @@ def get_pandas_client(table_name, file_path, file_type):
     else:
         raise ValueError(f"Unknown Pandas File Type: {file_type}")
 
-    pandas_client = ibis.backends.pandas.connect({table_name: df})
+    pandas_client = ibis.backends.pandas.Backend.connect({table_name: df})
 
     return pandas_client
 
@@ -127,19 +125,19 @@ def get_pandas_client(table_name, file_path, file_type):
 def get_ibis_table(client, schema_name, table_name, database_name=None):
     """Return Ibis Table for Supplied Client.
 
-    client (IbisClient): Client to use for table
+    client (Backend): Client to use for table
     schema_name (str): Schema name of table object
     table_name (str): Table name of table object
     database_name (str): Database name (generally default is used)
     """
-    if type(client) in [
+    if client.name in [
         OracleClient,
         PostgreSQLClient,
         DB2Client,
         MSSQLClient,
     ]:
         return client.table(table_name, database=database_name, schema=schema_name)
-    elif type(client) in [PandasClient]:
+    elif client.name in [PandasClient]:
         return client.table(table_name, schema=schema_name)
     else:
         return client.table(table_name, database=schema_name)
@@ -153,7 +151,7 @@ def get_ibis_table_schema(client, schema_name, table_name):
     table_name (str): Table name of table object
     database_name (str): Database name (generally default is used)
     """
-    if type(client) in [MySQLClient, PostgreSQLClient]:
+    if client.name in [MySQLClient, PostgreSQLClient]:
         return client.schema(schema_name).table(table_name).schema()
     else:
         return client.get_schema(table_name, schema_name)
@@ -161,7 +159,7 @@ def get_ibis_table_schema(client, schema_name, table_name):
 
 def list_schemas(client):
     """Return a list of schemas in the DB."""
-    if type(client) in [
+    if client.name in [
         OracleClient,
         PostgreSQLClient,
         DB2Client,
@@ -176,7 +174,7 @@ def list_schemas(client):
 
 def list_tables(client, schema_name):
     """Return a list of tables in the DB schema."""
-    if type(client) in [
+    if client.name in [
         OracleClient,
         PostgreSQLClient,
         DB2Client,
@@ -247,16 +245,16 @@ def get_data_client(connection_config):
 
 
 CLIENT_LOOKUP = {
-    "BigQuery": get_bigquery_client,
-    "Impala": impala_connect,
-    "MySQL": MySQLClient,
-    "Oracle": OracleClient,
-    "FileSystem": get_pandas_client,
-    "Postgres": PostgreSQLClient,
-    "Redshift": PostgreSQLClient,
-    "Teradata": TeradataClient,
-    "MSSQL": MSSQLClient,
-    "Snowflake": snowflake_connect,
-    "Spanner": spanner_connect,
-    "DB2": DB2Client,
+    "BigQuery": get_bigquery_client.name,
+    "Impala": impala_connect.name,
+    "MySQL": MySQLClient.name,
+    "Oracle": OracleClient.name,
+    "FileSystem": get_pandas_client.name,
+    "Postgres": PostgreSQLClient.name,
+    "Redshift": PostgreSQLClient.name,
+    "Teradata": TeradataClient.name,
+    "MSSQL": MSSQLClient.name,
+    "Snowflake": snowflake_connect.name,
+    "Spanner": spanner_connect.name,
+    "DB2": DB2Client.name,
 }

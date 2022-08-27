@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ibis.backends.base_sql import fixed_arity
-from ibis.backends.impala import connect, udf
+from ibis.backends.base.sql.registry import fixed_arity
+from ibis.backends.impala import udf, Backend, _HS2_TTypeId_to_dtype
 from ibis.backends.impala.compiler import rewrites
-from ibis.backends.impala.client import ImpalaClient, ImpalaQuery, _HS2_TTypeId_to_dtype
 import ibis.expr.datatypes as dt
 import ibis.expr.operations as ops
 import ibis.expr.schema as sch
@@ -23,6 +22,7 @@ import numpy as np
 import pandas as pd
 
 _impala_to_ibis_type = udf._impala_to_ibis_type
+
 
 def impala_connect(
     host=None,
@@ -37,7 +37,7 @@ def impala_connect(
     kerberos_service_name = (kerberos_service_name, "impala")[
         kerberos_service_name is None
     ]
-    return connect(
+    return Backend.do_connect(
         host=host,
         port=int(port),
         database=database,
@@ -120,6 +120,7 @@ def _fetch(self, cursor):
         df = _column_batches_to_dataframe(names, batches)
         return df
 
+
 def _column_batches_to_dataframe(names, batches):
     cols = {}
     for name, chunks in zip(names, zip(*[b.columns for b in batches])):
@@ -180,6 +181,7 @@ def _chunks_to_pandas_array(chunks):
 
     return target
 
+
 @rewrites(ops.IfNull)
 def _if_null(expr):
     arg, fill_value = expr.op().args
@@ -187,5 +189,5 @@ def _if_null(expr):
 
 
 udf.parse_type = parse_type
-ImpalaClient.get_schema = get_schema
-ImpalaQuery._fetch = _fetch
+Backend.get_schema = get_schema
+Backend._fetch = _fetch

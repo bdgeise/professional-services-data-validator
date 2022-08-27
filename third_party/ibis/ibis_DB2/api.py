@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ibis.backends.base_sqlalchemy.alchemy import to_sqlalchemy
+import third_party.ibis.ibis_DB2
 from third_party.ibis.ibis_DB2.client import DB2Client
 from third_party.ibis.ibis_DB2.compiler import dialect, rewrites  # noqa: F401
 

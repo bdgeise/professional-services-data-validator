@@ -33,7 +33,7 @@ from third_party.ibis.ibis_cloud_spanner import compiler as comp
 from third_party.ibis.ibis_cloud_spanner.datatypes import (
     ibis_type_to_cloud_spanner_type,
 )
-from ibis.client import Database, Query, SQLClient
+from ibis.backends.base import Database
 
 from third_party.ibis.ibis_cloud_spanner import table
 

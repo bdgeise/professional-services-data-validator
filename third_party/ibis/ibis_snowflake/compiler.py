@@ -13,7 +13,7 @@
 # the License.
 
 
-import ibis.backends.base_sqlalchemy.alchemy as alch
+import ibis.backends.base.sql.alchemy as alch
 import sqlalchemy as sa
 import snowflake.sqlalchemy.snowdialect as sf
 import snowflake.sqlalchemy as sf_sa
@@ -33,7 +33,7 @@ import platform
 import string
 import functools
 
-from ibis.backends.base_sql import fixed_arity, unary
+from ibis.backends.base.sql.registry import fixed_arity, unary
 
 
 # todo add more operations to registry
@@ -601,6 +601,5 @@ def _any_all_no_op(expr):
 
 class SnowflakeDialect(al_sf.AlchemyDialect):
     translator = SnowflakeExprTranslator
-
 
 dialect = SnowflakeDialect

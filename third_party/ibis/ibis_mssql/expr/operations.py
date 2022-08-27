@@ -20,40 +20,28 @@ from ibis.expr.signature import Argument as Arg
 
 
 class StringContains(ops.ValueOp):
-    arg = Arg(rlz.string)
-    substr = Arg(rlz.string)
+    arg = rlz.string
+    substr = rlz.string
     start = Arg(rlz.integer, default=None)
     end = Arg(rlz.integer, default=None)
-    output_type = rlz.shape_like('arg', dt.boolean)
+    output_type = rlz.shape_like(rlz.integer)
 
 
-class StringSQLLike(ops.ValueOp):
+class StringSQLLike(ops.Value):
     arg = Arg(rlz.string)
     pattern = Arg(rlz.string)
     escape = Arg(str, default=None)
-    output_type = rlz.shape_like('arg', dt.boolean)
+    output_type = rlz.shape_like('arg')
 
 
 class IsNull(ops.UnaryOp):
-    output_type = rlz.shape_like('arg', dt.boolean)
+    output_dtype = dt.boolean
+    output_type = rlz.shape_like('arg')
 
 
 class NotNull(ops.UnaryOp):
-    output_type = rlz.shape_like('arg', dt.boolean)
 
-
-class Between(ops.ValueOp, ops.BooleanValueOp):
-    arg = Arg(rlz.any)
-    lower_bound = Arg(rlz.any)
-    upper_bound = Arg(rlz.any)
-
-    def output_type(self):
-        arg, lower, upper = self.args
-
-        if not (rlz.comparable(arg, lower) and rlz.comparable(arg, upper)):
-            raise TypeError('Arguments are not comparable')
-
-        return rlz.shape_like(self.args, dt.boolean)
+    output_type = rlz.shape_like('arg')
 
 
 class NotAny(Any):

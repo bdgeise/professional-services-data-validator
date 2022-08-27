@@ -7,22 +7,22 @@ import toolz
 from multipledispatch import Dispatcher
 
 import ibis
-import ibis.backends.base_sqlalchemy.compiler as comp
+import ibis.util as util
+import ibis.backends.base.sql.alchemy.datatypes as comp
 import ibis.expr.datatypes as dt
 import ibis.expr.lineage as lin
 import ibis.expr.operations as ops
 import ibis.expr.types as ir
-from ibis.backends import base_sql
+from ibis.backends.base import sql
 
-from ibis.backends.base_sql.identifiers import base_identifiers
+from ibis.backends.base.sql.registry.identifiers import base_identifiers
 
 from ibis.common.exceptions import UnsupportedOperationError
 from .datatypes import ibis_type_to_teradata_type
-from ibis.backends.base_sql import fixed_arity, literal, reduction, unary
-from ibis.backends.base_sql.compiler import (
-    BaseExprTranslator,
-    BaseSelect,
-    BaseTableSetFormatter,
+from ibis.backends.base.sql.registry import fixed_arity, literal, reduction, unary
+from ibis.backends.base.sql.compiler import (
+    SelectBuilder,
+    TableSetFormatter,
 )
 
 
@@ -101,7 +101,7 @@ Depedancy Design of Classes
 
 
 _operation_registry = {
-    **base_sql.operation_registry,
+    **sql.operation_registry,
 }
 
 
@@ -119,7 +119,7 @@ class TeradataUDFDefinition(comp.DDL):
         return self.expr.op().js
 
 
-class TeradataTableSetFormatter(BaseTableSetFormatter):
+class TeradataTableSetFormatter(TableSetFormatter):
     @classmethod
     def _quote_identifier(self, name, quotechar='"', force=False):
         if force or name.count(" ") or name in base_identifiers:
@@ -147,7 +147,7 @@ class TeradataExprTranslator(comp.ExprTranslator):
         return _name_expr(translated, quoted_name)
 
 
-class TeradataSelect(BaseSelect):
+class TeradataSelect(SelectBuilder):
 
     translator = TeradataExprTranslator
 

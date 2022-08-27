@@ -22,7 +22,7 @@ from third_party.ibis.ibis_cloud_spanner import api as cs_compile
 import third_party.ibis.ibis_cloud_spanner as cs
 import ibis.expr.datatypes as dt
 import ibis.expr.operations as ops
-from ibis.expr.types import TableExpr
+from ibis.expr.types import Table
 
 pytestmark = pytest.mark.cloud_spanner
 
@@ -463,7 +463,7 @@ def test_large_compile():
     names = [f"col_{i}" for i in range(num_columns)]
     schema = ibis.Schema(names, ["string"] * num_columns)
     ibis_client = MockCloudSpannerClient()
-    table = TableExpr(ops.SQLQueryResult("select * from t", schema, ibis_client))
+    table = Table(ops.SQLQueryResult("select * from t", schema, ibis_client))
     for _ in range(num_joins):
         table = table.mutate(dummy=ibis.literal(""))
         table = table.left_join(table, ["dummy"])[[table]]

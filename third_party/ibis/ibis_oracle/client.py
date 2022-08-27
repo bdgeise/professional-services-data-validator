@@ -22,7 +22,7 @@ from sqlalchemy.dialects.oracle.cx_oracle import OracleDialect_cx_oracle
 from third_party.ibis.ibis_oracle.compiler import OracleDialect
 
 import ibis.expr.datatypes as dt
-import ibis.backends.base_sqlalchemy.alchemy as alch
+import ibis.backends.base.sql.alchemy as alch
 import cx_Oracle  # NOQA fail early if the driver is missing
 
 

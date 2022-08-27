@@ -9,7 +9,7 @@ from pytest import param
 
 import ibis
 import ibis.expr.types as ir
-import third_party.ibis.ibis_mssql
+import third_party.ibis.ibis_mssql as ibis_mssql
 from ibis import literal as L
 
 sa = pytest.importorskip('sqlalchemy')

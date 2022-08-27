@@ -33,12 +33,12 @@ import ibis.common.geospatial as geo
 import ibis.expr.datatypes as dt
 import ibis.expr.operations as ops
 import ibis.expr.types as ir
-import ibis.backends.base_sqlalchemy.alchemy as alch
+import ibis.backends.base.sql.alchemy as alch
 
 # used for literal translate
-from ibis.backends.base_sqlalchemy.alchemy import (
-    _get_sqla_table,
-    _variance_reduction,
+from ibis.backends.base.sql.alchemy import (
+    get_sqla_table,
+    variance_reduction,
     fixed_arity,
     infix_op,
     unary,
@@ -390,7 +390,7 @@ def _table_column(t, expr):
     ctx = t.context
     table = op.table
 
-    sa_table = _get_sqla_table(ctx, table)
+    sa_table = get_sqla_table(ctx, table)
     out_expr = getattr(sa_table.c, op.name)
 
     expr_type = expr.type()
@@ -532,8 +532,8 @@ _operation_registry.update(
         ops.Mean: _reduction('avg'),
         ops.Min: _reduction('min'),
         ops.Max: _reduction('max'),
-        ops.Variance: _variance_reduction('var'),
-        ops.StandardDev: _variance_reduction('stddev'),
+        ops.Variance: variance_reduction('var'),
+        ops.StandardDev: variance_reduction('stddev'),
         # ops.RandomScalar: _random,
         # now is in the timezone of the server, but we want UTC
         ops.TimestampNow: lambda *args: sa.func.timezone('UTC', sa.func.now()),
