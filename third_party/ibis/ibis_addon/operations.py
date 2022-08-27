@@ -49,19 +49,21 @@ class BitXor(Reduction):
 
     arg = rlz.column(rlz.integer)
     where = rlz.optional(rlz.boolean)
-    output_type = rlz.scalar_like("arg")
+    output_type = rlz.shape_like("arg")
 
 
 class Hash(Value):
     arg = rlz.any
     how = rlz.isin({"fnv", "farm_fingerprint"})
-    output_type = rlz.shape_like("arg", dt.int64)
+    output_dtype = dt.int64
+    output_type = rlz.shape_like("arg")
 
 
 class HashBytes(Value):
     arg = rlz.one_of([rlz.value(dt.string), rlz.value(dt.binary)])
     how = rlz.isin({"sha256", "farm_fingerprint"})
-    output_type = rlz.shape_like("arg", "binary")
+    output_dtype = dt.binary
+    output_type = rlz.shape_like("arg")
 
 
 class RawSQL(Comparison):
@@ -167,7 +169,7 @@ def sa_format_raw_sql(translator, expr):
 
 
 _pandas_client._inferable_pandas_dtypes["floating"] = _pandas_client.dt.float64
-IntegerColumn.bit_xor = ibis.expr.api._agg_function("bit_xor", BitXor, True)
+IntegerColumn.bit_xor = ibis.expr.api.aggregate("bit_xor")
 BinaryValue.hash = compile_hash
 StringValue.hash = compile_hash
 BinaryValue.hashbytes = compile_hashbytes
