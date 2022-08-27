@@ -37,8 +37,8 @@ from ibis.backends.pandas import client as _pandas_client
 from ibis.backends.base.sql.alchemy import AlchemyExprTranslator
 from ibis.backends.base.sql.compiler import ExprTranslator
 from ibis.backends.base.sql.compiler import translator
-from third_party.ibis.ibis_oracle.compiler import OracleExprTranslator
-from third_party.ibis.ibis_teradata.compiler import TeradataExprTranslator
+# from third_party.ibis.ibis_oracle.compiler import OracleExprTranslator
+# from third_party.ibis.ibis_teradata.compiler import TeradataExprTranslator
 
 # from third_party.ibis.ibis_mssql.compiler import MSSQLExprTranslator # TODO figure how to add RAWSQL
 # from third_party.ibis.ibis_snowflake.compiler import SnowflakeExprTranslator
@@ -182,6 +182,6 @@ translator.ExprTranslator._registry[HashBytes] = format_hashbytes_base
 BigQueryExprTranslator._registry[RawSQL] = format_raw_sql
 ImpalaExprTranslator._registry[RawSQL] = format_raw_sql
 ImpalaExprTranslator._registry[HashBytes] = format_hashbytes_hive
-OracleExprTranslator._registry[RawSQL] = sa_format_raw_sql
-TeradataExprTranslator._registry[RawSQL] = format_raw_sql
-TeradataExprTranslator._registry[HashBytes] = format_hashbytes_teradata
+# OracleExprTranslator._registry[RawSQL] = sa_format_raw_sql
+# TeradataExprTranslator._registry[RawSQL] = format_raw_sql
+# TeradataExprTranslator._registry[HashBytes] = format_hashbytes_teradata
