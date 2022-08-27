@@ -169,7 +169,7 @@ def sa_format_raw_sql(translator, expr):
 
 
 _pandas_client._inferable_pandas_dtypes["floating"] = _pandas_client.dt.float64
-IntegerColumn.bit_xor = ibis.expr.api.aggregate("bit_xor")
+# IntegerColumn.bit_xor = ibis.expr.api.aggregate("bit_xor")
 BinaryValue.hash = compile_hash
 StringValue.hash = compile_hash
 BinaryValue.hashbytes = compile_hashbytes
