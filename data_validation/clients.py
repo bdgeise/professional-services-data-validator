@@ -26,8 +26,8 @@ from google.cloud import bigquery
 import ibis.backends.mysql as MySQLClient
 import ibis.backends.pandas as PandasClient
 import ibis.backends.postgres as PostgreSQLClient
-import third_party.ibis.ibis_cloud_spanner as spanner_connect
-import third_party.ibis.ibis_impala as impala_connect
+# import third_party.ibis.ibis_cloud_spanner as spanner_connect
+# import third_party.ibis.ibis_impala as impala_connect
 
 from data_validation import client_info, consts, exceptions
 
