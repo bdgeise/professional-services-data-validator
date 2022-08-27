@@ -245,7 +245,7 @@ def get_data_client(connection_config):
 
 
 CLIENT_LOOKUP = {
-    "BigQuery": get_bigquery_client.name,
+    "BigQuery": ibis_bigquery.name,
     "Impala": impala_connect.name,
     "MySQL": MySQLClient.name,
     "Oracle": OracleClient.name,
