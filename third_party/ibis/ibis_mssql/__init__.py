@@ -40,6 +40,7 @@ logging.basicConfig(
 class Backend(BaseAlchemyBackend):
     name = "mssql"
     compiler = MSSQLCompiler
+    database_name = None
 
     def do_connect(
         self,
