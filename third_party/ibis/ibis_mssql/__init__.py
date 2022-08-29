@@ -29,6 +29,12 @@ from third_party.ibis.ibis_mssql.compiler import MSSQLCompiler
 
 import pyodbc  # NOQA fail early if the driver is missing
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s-%(levelname)s: %(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+)
+
 
 class Backend(BaseAlchemyBackend):
     name = "mssql"
