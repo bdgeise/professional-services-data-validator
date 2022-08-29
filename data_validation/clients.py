@@ -117,7 +117,7 @@ def get_pandas_client(table_name, file_path, file_type):
     else:
         raise ValueError(f"Unknown Pandas File Type: {file_type}")
 
-    pandas_client = ibis.backends.pandas.Backend.connect({table_name: df})
+    pandas_client = ibis.backends.pandas.Backend().connect({table_name: df})
 
     return pandas_client
 
@@ -137,7 +137,7 @@ def get_ibis_table(client, schema_name, table_name, database_name=None):
         MSSQLClient.Backend.name,
     ]:
         return client.table(table_name, database=database_name, schema=schema_name)
-    elif client.name in [PandasClient]:
+    elif client.name in [PandasClient.Backend.name]:
         return client.table(table_name, schema=schema_name)
     else:
         return client.table(table_name, database=schema_name)
