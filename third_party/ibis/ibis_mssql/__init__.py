@@ -75,8 +75,9 @@ class Backend(BaseAlchemyBackend):
         else:
             url = sa.engine.url.make_url(url)
         new_backend = self.__class__()
+        print(type(new_backend))
         new_backend.do_connect(sa.create_engine(url))
-        new_backend.database_name = url.database
+        self.database_name = url.database
         new_backend.compiler = MSSQLCompiler
         return new_backend
 
