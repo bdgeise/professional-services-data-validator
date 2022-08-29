@@ -51,7 +51,7 @@ class Backend(BaseAlchemyBackend):
         url=None,
         driver='pyodbc',
         odbc_driver='ODBC Driver 17 for SQL Server',
-    ) -> "BaseBackend":
+    ) -> "BaseAlchemyBackend":
         """Create a :class:`Backend` for use with Ibis.
 
         Returns
@@ -150,7 +150,7 @@ def connect(
     driver='pyodbc',
     odbc_driver='ODBC Driver 17 for SQL Server',
     url=None,
-) -> BaseBackend:
+) -> BaseAlchemyBackend:
     """Create a :class:`Backend` for use with Ibis.
     Parameters
     ----------
