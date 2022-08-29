@@ -233,7 +233,7 @@ def get_data_client(connection_config):
         raise Exception(msg)
 
     try:
-        data_client = CLIENT_LOOKUP[source_type](**connection_config)
+        data_client = CLIENT_LOOKUP[source_type].connect(**connection_config)
         data_client._source_type = source_type
     except Exception as e:
         msg = 'Connection Type "{source_type}" could not connect: {error}'.format(
@@ -245,15 +245,15 @@ def get_data_client(connection_config):
 
 
 CLIENT_LOOKUP = {
-    "BigQuery": ibis_bigquery,
+    "BigQuery": ibis_bigquery.Backend,
     # "Impala": impala_connect.Backend.name,
     "MySQL": MySQLClient,
     # "Oracle": OracleClient.Backend.name,
     # "FileSystem": get_pandas_client.name,
-    "Postgres": PostgreSQLClient,
+    "Postgres": PostgreSQLClient.Backend,
     "Redshift": PostgreSQLClient,
     # "Teradata": TeradataClient.name,
-    "MSSQL": MSSQLClient,
+    "MSSQL": MSSQLClient.Backend,
     # "Snowflake": snowflake_connect.name,
     # "Spanner": spanner_connect.name,
     # "DB2": DB2Client.name,

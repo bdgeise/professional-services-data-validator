@@ -143,7 +143,7 @@ def connect(
     driver='pyodbc',
     odbc_driver='ODBC Driver 17 for SQL Server',
     url=None,
-) -> Backend:
+) -> BaseBackend:
     """Create a :class:`Backend` for use with Ibis.
     Parameters
     ----------
