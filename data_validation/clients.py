@@ -245,15 +245,15 @@ def get_data_client(connection_config):
 
 
 CLIENT_LOOKUP = {
-    "BigQuery": ibis_bigquery.Backend,
+    "BigQuery": ibis_bigquery,
     # "Impala": impala_connect.Backend.name,
-    "MySQL": MySQLClient,
+    "MySQL": MySQLClient.Backend(),
     # "Oracle": OracleClient.Backend.name,
     # "FileSystem": get_pandas_client.name,
-    "Postgres": PostgreSQLClient.Backend,
-    "Redshift": PostgreSQLClient,
+    "Postgres": PostgreSQLClient.Backend(),
+    "Redshift": PostgreSQLClient.Backend(),
     # "Teradata": TeradataClient.name,
-    "MSSQL": MSSQLClient.Backend,
+    "MSSQL": MSSQLClient,
     # "Snowflake": snowflake_connect.name,
     # "Spanner": spanner_connect.name,
     # "DB2": DB2Client.name,
