@@ -284,7 +284,9 @@ class DataValidation(object):
         self.run_metadata.validations = validation_builder.get_metadata()
 
         source_query = validation_builder.get_source_query()
+        logging.debug(f"Source query {source_query}")
         target_query = validation_builder.get_target_query()
+        logging.debug(f"Target query {target_query}")
 
         join_on_fields = (
             set(validation_builder.get_primary_keys())

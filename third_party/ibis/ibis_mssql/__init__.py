@@ -16,6 +16,7 @@
 import contextlib
 import datetime
 import getpass
+import logging
 
 import sqlalchemy as sa
 
@@ -109,6 +110,8 @@ class Backend(BaseAlchemyBackend):
             str: 'string',
             datetime.datetime: 'timestamp',
         }
+
+        logging.debug(f"Limited query {limited_query}")
 
         with self.execute(limited_query, results=True) as cur:
             type_info = cur.fetchall()
