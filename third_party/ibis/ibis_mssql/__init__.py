@@ -51,12 +51,8 @@ class Backend(BaseAlchemyBackend):
         url=None,
         driver='pyodbc',
         odbc_driver='ODBC Driver 17 for SQL Server',
-    ) -> "BaseAlchemyBackend":
+    ) -> None:
         """Create a :class:`Backend` for use with Ibis.
-
-        Returns
-        -------
-        Backend
         """
         if url is None:
             if driver != 'pyodbc':
@@ -75,12 +71,8 @@ class Backend(BaseAlchemyBackend):
             )
         else:
             url = sa.engine.url.make_url(url)
-        new_backend = self.__class__()
-        print(type(new_backend))
-        new_backend.do_connect(sa.create_engine(url))
-        new_backend.database_name = url.database
-        new_backend.compiler = MSSQLCompiler
-        return new_backend
+        self.database_name = url.database
+        super().do_connect(sa.create_engine(url))
 
     @contextlib.contextmanager
     def begin(self):
@@ -150,7 +142,7 @@ def connect(
     driver='pyodbc',
     odbc_driver='ODBC Driver 17 for SQL Server',
     url=None,
-) -> BaseAlchemyBackend:
+) -> Backend:
     """Create a :class:`Backend` for use with Ibis.
     Parameters
     ----------
