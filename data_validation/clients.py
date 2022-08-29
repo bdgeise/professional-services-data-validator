@@ -233,7 +233,7 @@ def get_data_client(connection_config):
         raise Exception(msg)
 
     try:
-        data_client = CLIENT_LOOKUP[source_type](**connection_config)
+        data_client = CLIENT_LOOKUP[source_type].connect(**connection_config)
         data_client._source_type = source_type
     except Exception as e:
         msg = 'Connection Type "{source_type}" could not connect: {error}'.format(
