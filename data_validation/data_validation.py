@@ -332,7 +332,7 @@ class DataValidation(object):
                 source_df, target_df, join_on_fields, verbose=self.verbose
             )
 
-            pandas_client = ibis.backends.pandas.connect(
+            pandas_client = ibis.backends.pandas.Backend().connect(
                 {combiner.DEFAULT_SOURCE: source_df, combiner.DEFAULT_TARGET: target_df}
             )
 
