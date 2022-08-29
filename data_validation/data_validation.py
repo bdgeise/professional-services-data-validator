@@ -340,8 +340,8 @@ class DataValidation(object):
                 result_df = combiner.generate_report(
                     pandas_client,
                     self.run_metadata,
-                    pandas_client.table(combiner.DEFAULT_SOURCE, schema=pd_schema),
-                    pandas_client.table(combiner.DEFAULT_TARGET, schema=pd_schema),
+                    pandas_client.table(combiner.DEFAULT_SOURCE),
+                    pandas_client.table(combiner.DEFAULT_TARGET),
                     join_on_fields=join_on_fields,
                     is_value_comparison=is_value_comparison,
                     verbose=self.verbose,
