@@ -131,10 +131,10 @@ def get_ibis_table(client, schema_name, table_name, database_name=None):
     database_name (str): Database name (generally default is used)
     """
     if client.name in [
-        OracleClient,
-        PostgreSQLClient,
-        DB2Client,
-        MSSQLClient,
+        # OracleClient,
+        PostgreSQLClient.Backend.name,
+        # DB2Client,
+        MSSQLClient.Backend.name,
     ]:
         return client.table(table_name, database=database_name, schema=schema_name)
     elif client.name in [PandasClient]:
@@ -151,7 +151,7 @@ def get_ibis_table_schema(client, schema_name, table_name):
     table_name (str): Table name of table object
     database_name (str): Database name (generally default is used)
     """
-    if client.name in [MySQLClient, PostgreSQLClient]:
+    if client.name in [MySQLClient.Backend.name, PostgreSQLClient.Backend.name]:
         return client.schema(schema_name).table(table_name).schema()
     else:
         return client.get_schema(table_name, schema_name)
@@ -160,10 +160,10 @@ def get_ibis_table_schema(client, schema_name, table_name):
 def list_schemas(client):
     """Return a list of schemas in the DB."""
     if client.name in [
-        OracleClient,
-        PostgreSQLClient,
-        DB2Client,
-        MSSQLClient,
+        # OracleClient,
+        PostgreSQLClient.Backend.name,
+        # DB2Client,
+        MSSQLClient.Backend.name,
     ]:
         return client.list_schemas()
     elif hasattr(client, "list_databases"):
@@ -175,10 +175,10 @@ def list_schemas(client):
 def list_tables(client, schema_name):
     """Return a list of tables in the DB schema."""
     if client.name in [
-        OracleClient,
-        PostgreSQLClient,
-        DB2Client,
-        MSSQLClient,
+        # OracleClient,
+        PostgreSQLClient.Backend.name,
+        # DB2Client,
+        MSSQLClient.Backend.name,
     ]:
         return client.list_tables(schema=schema_name)
     elif schema_name:
