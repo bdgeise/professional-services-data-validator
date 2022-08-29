@@ -24,6 +24,7 @@ import sqlalchemy.dialects.mssql as mssql
 
 import ibis.expr.datatypes as dt
 from ibis.backends.base.sql.alchemy import BaseAlchemyBackend
+from ibis.backends.base import BaseBackend
 import ibis.expr.schema as sch
 from third_party.ibis.ibis_mssql.compiler import MSSQLCompiler
 
@@ -40,7 +41,7 @@ class Backend(BaseAlchemyBackend):
     name = "mssql"
     compiler = MSSQLCompiler
 
-    def connect(
+    def do_connect(
         self,
         host='localhost',
         user=None,
@@ -77,7 +78,7 @@ class Backend(BaseAlchemyBackend):
         new_backend = self.__class__()
         print(type(new_backend))
         new_backend.do_connect(sa.create_engine(url))
-        self.database_name = url.database
+        new_backend.database_name = url.database
         new_backend.compiler = MSSQLCompiler
         return new_backend
 
@@ -149,7 +150,7 @@ def connect(
     driver='pyodbc',
     odbc_driver='ODBC Driver 17 for SQL Server',
     url=None,
-) -> Backend:
+) -> BaseBackend:
     """Create a :class:`Backend` for use with Ibis.
     Parameters
     ----------
