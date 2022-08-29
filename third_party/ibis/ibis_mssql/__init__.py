@@ -163,7 +163,7 @@ def connect(
     Backend
     """
     backend = Backend()
-    return backend.connect(
+    backend.do_connect(
         host=host,
         user=user,
         password=password,
@@ -173,6 +173,7 @@ def connect(
         driver=driver,
         odbc_driver=odbc_driver,
     )
+    return backend
 
 
 @dt.dtype.register(mssql.UNIQUEIDENTIFIER)

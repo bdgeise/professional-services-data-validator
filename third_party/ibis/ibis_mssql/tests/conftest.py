@@ -119,6 +119,7 @@ def con(data_directory, script_directory):
 
 @pytest.fixture(scope='module')
 def db(con):
+    print(con.meta)
     return con.database()
 
 
