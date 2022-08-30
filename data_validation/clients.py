@@ -87,6 +87,11 @@ try:
 except Exception:
     DB2Client = _raise_missing_client_error("pip install ibm_db_sa")
 
+try:
+    import third_party.ibis.ibis_redshift as RedshiftClient
+except Exception:
+    RedshiftClient = _raise_missing_client_error("pip install sqlalchemy-redshift")
+
 
 def get_bigquery_client(project_id, dataset_id=None, credentials=None):
     info = client_info.get_http_client_info()
@@ -135,6 +140,7 @@ def get_ibis_table(client, schema_name, table_name, database_name=None):
         PostgreSQLClient.Backend.name,
         # DB2Client,
         MSSQLClient.Backend.name,
+        RedshiftClient.Backend.name,
     ]:
         return client.table(table_name, database=database_name, schema=schema_name)
     elif client.name in [PandasClient.Backend.name]:
@@ -151,7 +157,7 @@ def get_ibis_table_schema(client, schema_name, table_name):
     table_name (str): Table name of table object
     database_name (str): Database name (generally default is used)
     """
-    if client.name in [MySQLClient.Backend.name, PostgreSQLClient.Backend.name]:
+    if client.name in [MySQLClient.Backend.name, PostgreSQLClient.Backend.name, RedshiftClient.Backend.name]:
         return client.schema(schema_name).table(table_name).schema()
     else:
         return client.get_schema(table_name, schema_name)
@@ -164,6 +170,7 @@ def list_schemas(client):
         PostgreSQLClient.Backend.name,
         # DB2Client,
         MSSQLClient.Backend.name,
+        RedshiftClient.Backend.name
     ]:
         return client.list_schemas()
     elif hasattr(client, "list_databases"):
@@ -179,6 +186,7 @@ def list_tables(client, schema_name):
         PostgreSQLClient.Backend.name,
         # DB2Client,
         MSSQLClient.Backend.name,
+        RedshiftClient.Backend.name
     ]:
         return client.list_tables(schema=schema_name)
     elif schema_name:
@@ -251,7 +259,7 @@ CLIENT_LOOKUP = {
     # "Oracle": OracleClient.Backend.name,
     # "FileSystem": get_pandas_client.name,
     "Postgres": PostgreSQLClient.Backend(),
-    "Redshift": PostgreSQLClient.Backend(),
+    "Redshift": RedshiftClient.Backend(),
     # "Teradata": TeradataClient.name,
     "MSSQL": MSSQLClient,
     # "Snowflake": snowflake_connect.name,
