@@ -36,6 +36,20 @@ class MSSQLExprTranslator(alch.AlchemyExprTranslator):
         }
     )
 
+    @classmethod
+    def compiles(cls, klass):
+        def decorator(f):
+            cls._registry[klass] = f
+            return f
+
+        return decorator
+
+    def _trans_param(self, expr):
+        op = expr.op()
+        if op not in self.context.params:
+            raise KeyError(op)
+        return "@{}".format(expr.get_name())
+
 rewrites = MSSQLExprTranslator.rewrites
 compiles = MSSQLExprTranslator.compiles
 
