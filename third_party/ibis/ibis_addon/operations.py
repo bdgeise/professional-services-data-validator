@@ -40,7 +40,7 @@ from ibis.backends.base.sql.compiler import translator
 # from third_party.ibis.ibis_oracle.compiler import OracleExprTranslator
 # from third_party.ibis.ibis_teradata.compiler import TeradataExprTranslator
 
-# from third_party.ibis.ibis_mssql.compiler import MSSQLExprTranslator # TODO figure how to add RAWSQL
+from third_party.ibis.ibis_mssql.compiler import MSSQLExprTranslator # TODO figure how to add RAWSQL
 # from third_party.ibis.ibis_snowflake.compiler import SnowflakeExprTranslator
 # from third_party.ibis.ibis_oracle.compiler import OracleExprTranslator <<<<<< DB2
 
@@ -184,6 +184,7 @@ translator.ExprTranslator._registry[HashBytes] = format_hashbytes_base
 BigQueryExprTranslator._registry[RawSQL] = format_raw_sql
 ImpalaExprTranslator._registry[RawSQL] = format_raw_sql
 ImpalaExprTranslator._registry[HashBytes] = format_hashbytes_hive
+MSSQLExprTranslator._registry[RawSQL] = format_raw_sql
 # OracleExprTranslator._registry[RawSQL] = sa_format_raw_sql
 # TeradataExprTranslator._registry[RawSQL] = format_raw_sql
 # TeradataExprTranslator._registry[HashBytes] = format_hashbytes_teradata
