@@ -36,6 +36,9 @@ class MSSQLExprTranslator(alch.AlchemyExprTranslator):
         }
     )
 
+rewrites = MSSQLExprTranslator.rewrites
+compiles = MSSQLExprTranslator.compiles
+
 class MSSQLCompiler(alch.AlchemyCompiler):
 
     translator_class = MSSQLExprTranslator
