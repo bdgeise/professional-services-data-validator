@@ -22,6 +22,8 @@ import sqlalchemy as sa
 
 import sqlalchemy.dialects.mssql as mssql
 
+import ibis.expr.types as ir
+import ibis.expr.operations as ops
 import ibis.expr.datatypes as dt
 from ibis.backends.base.sql.alchemy import BaseAlchemyBackend
 from ibis.backends.base import BaseBackend
@@ -119,6 +121,25 @@ class Backend(BaseAlchemyBackend):
 
         tuples = [(col, type_map[typestr]) for col, typestr in type_info]
         return sch.Schema.from_tuples(tuples)
+
+    def sql(self, query: str) -> ir.Table:
+        """Convert a SQL query to an Ibis table expression.
+
+        Parameters
+        ----------
+        query
+            SQL string
+
+        Returns
+        -------
+        Table
+            Table expression
+        """
+        # Get the schema by adding a TOP 0 on to the end of the query. If
+        # there is already a limit in the query, we find and remove it
+        limited_query = f'SELECT TOP 0 * FROM ({query}) t0'
+        schema = self._get_schema_using_query(limited_query)
+        return ops.SQLQueryResult(query, schema, self).to_expr()
 
 
 def compile(expr, params=None, **kwargs):
