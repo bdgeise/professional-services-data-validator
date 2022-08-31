@@ -14,14 +14,13 @@
 
 
 import contextlib
-import datetime
 import getpass
 import logging
 
 import sqlalchemy as sa
 
 import sqlalchemy.dialects.mssql as mssql
-
+from ibis import util
 import ibis.expr.types as ir
 import ibis.expr.operations as ops
 import ibis.expr.datatypes as dt
