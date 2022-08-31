@@ -309,8 +309,18 @@ class DataValidation(object):
         )
 
         if process_in_memory:
-            source_df = self.config_manager.source_client.execute(source_query)
-            target_df = self.config_manager.target_client.execute(target_query)
+            if self.config_manager.validation_type == consts.CUSTOM_QUERY:
+                with self.config_manager.source_client._safe_raw_sql(source_query) as cur:
+                    schema = self.config_manager.source_client._get_schema_using_query(source_query)
+                    source_df = self.config_manager.source_client.fetch_from_cursor(cur, schema)
+
+                with self.config_manager.target_client._safe_raw_sql(target_query) as cur:
+                    schema = self.config_manager.target_client._get_schema_using_query(target_query)
+                    target_df = self.config_manager.target_client.fetch_from_cursor(cur, schema)
+
+            else:
+                source_df = self.config_manager.source_client.execute(source_query)
+                target_df = self.config_manager.target_client.execute(target_query)
 
             # Drop excess fields for row validation to avoid pandas errors for unsupported column data types (i.e structs)
             if (

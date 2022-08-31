@@ -36,15 +36,21 @@ class ValidationMetadata(object):
     primary_keys: list
     num_random_rows: int
     threshold: float
+    source_custom_query: str
+    target_custom_query: str
 
     def get_table_name(self, result_type):
         if result_type == consts.RESULT_TYPE_SOURCE:
+            if self.source_custom_query:
+                return self.source_custom_query
             return (
                 self.source_table_schema + "." + self.source_table_name
                 if self.source_table_schema
                 else self.source_table_name
             )
         elif result_type == consts.RESULT_TYPE_TARGET:
+            if self.target_custom_query:
+                return self.target_custom_query
             return (
                 self.target_table_schema + "." + self.target_table_name
                 if self.target_table_schema
@@ -55,9 +61,15 @@ class ValidationMetadata(object):
 
     def get_column_name(self, result_type):
         if result_type == consts.RESULT_TYPE_SOURCE:
-            return self.source_column_name
+            if self.source_column_name:
+                return self.source_column_name
+            else:
+                return ""
         elif result_type == consts.RESULT_TYPE_TARGET:
-            return self.target_column_name
+            if self.target_column_name:
+                return self.target_column_name
+            else:
+                return ""
         else:
             raise ValueError(f"Unexpected result_type: {result_type}")
 
