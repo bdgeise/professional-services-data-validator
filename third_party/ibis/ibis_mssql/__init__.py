@@ -105,20 +105,31 @@ class Backend(BaseAlchemyBackend):
             ' database, use client.database({!r})'.format(name)
         )
 
-    def _get_schema_using_query(self, limited_query):
+    def _get_schema_using_query(self, query: str):
         type_map = {
-            int: 'int64',
-            bool: 'boolean',
-            float: 'float64',
-            str: 'string',
-            datetime.datetime: 'timestamp',
+            'int': 'int64',
+            'bool': 'boolean',
+            'float': 'float64',
+            'str': 'string',
+            'datetime': 'timestamp',
         }
 
-        logging.debug(f"Limited query {limited_query}")
-
-        with self.execute(limited_query, results=True) as cur:
-            type_info = cur.fetchall()
-
+        raw_name = util.guid()
+        name = self.con.dialect.identifier_preparer.quote_identifier(raw_name)
+        type_info_sql = f"""\
+        SELECT
+          COLUMN_NAME,
+          DATA_TYPE
+        FROM information_schema.columns
+        WHERE table_name = '{raw_name}'
+        ORDER BY COLUMN_NAME
+        """
+        with self.con.connect() as con:
+            con.execute(f"CREATE VIEW {name} AS {query}")
+            try:
+                type_info = con.execute(type_info_sql).fetchall()
+            finally:
+                con.execute(f"DROP VIEW {name}")
         tuples = [(col, type_map[typestr]) for col, typestr in type_info]
         return sch.Schema.from_tuples(tuples)
 
