@@ -135,15 +135,15 @@ def get_ibis_table(client, schema_name, table_name, database_name=None):
     table_name (str): Table name of table object
     database_name (str): Database name (generally default is used)
     """
-    if client.name in [
+    if isinstance(client, (
         # OracleClient,
-        PostgreSQLClient.Backend.name,
+        PostgreSQLClient.Backend,
         # DB2Client,
-        MSSQLClient.Backend.name,
-        RedshiftClient.Backend.name,
-    ]:
+        MSSQLClient.Backend,
+        RedshiftClient.Backend,
+    )):
         return client.table(table_name, database=database_name, schema=schema_name)
-    elif client.name in [PandasClient.Backend.name]:
+    elif isinstance(client, (PandasClient.Backend,)):
         return client.table(table_name, schema=schema_name)
     else:
         return client.table(table_name, database=schema_name)
@@ -157,7 +157,7 @@ def get_ibis_table_schema(client, schema_name, table_name):
     table_name (str): Table name of table object
     database_name (str): Database name (generally default is used)
     """
-    if client.name in [MySQLClient.Backend.name, PostgreSQLClient.Backend.name, RedshiftClient.Backend.name]:
+    if isinstance(client, (MySQLClient.Backend, PostgreSQLClient.Backend, RedshiftClient.Backend)):
         return client.schema(schema_name).table(table_name).schema()
     else:
         return client.get_schema(table_name, schema_name)
@@ -165,13 +165,13 @@ def get_ibis_table_schema(client, schema_name, table_name):
 
 def list_schemas(client):
     """Return a list of schemas in the DB."""
-    if client.name in [
+    if isinstance(client, (
         # OracleClient,
-        PostgreSQLClient.Backend.name,
+        PostgreSQLClient.Backend,
         # DB2Client,
-        MSSQLClient.Backend.name,
-        RedshiftClient.Backend.name
-    ]:
+        MSSQLClient.Backend,
+        RedshiftClient.Backend
+    )):
         return client.list_schemas()
     elif hasattr(client, "list_databases"):
         return client.list_databases()
@@ -181,13 +181,13 @@ def list_schemas(client):
 
 def list_tables(client, schema_name):
     """Return a list of tables in the DB schema."""
-    if client.name in [
+    if isinstance(client, (
         # OracleClient,
-        PostgreSQLClient.Backend.name,
+        PostgreSQLClient.Backend,
         # DB2Client,
-        MSSQLClient.Backend.name,
-        RedshiftClient.Backend.name
-    ]:
+        MSSQLClient.Backend,
+        RedshiftClient.Backend
+    )):
         return client.list_tables(schema=schema_name)
     elif schema_name:
         return client.list_tables(database=schema_name)
