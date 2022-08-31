@@ -27,13 +27,6 @@ from ibis.backends.postgres.compiler import PostgreSQLCompiler
 from ibis.backends.postgres.datatypes import _get_type
 import sqlalchemy_redshift
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s-%(levelname)s: %(message)s",
-    datefmt="%m/%d/%Y %I:%M:%S %p",
-)
-
-
 class Backend(BaseAlchemyBackend):
     name = "redshift"
     compiler = PostgreSQLCompiler
