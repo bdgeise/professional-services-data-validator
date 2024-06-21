@@ -32,13 +32,13 @@ DEFAULT_TARGET = "target"
 
 
 def generate_report(
-    client,
-    run_metadata,
-    source,
-    target,
-    join_on_fields=(),
-    is_value_comparison=False,
-    verbose=False,
+        client,
+        run_metadata,
+        source,
+        target,
+        join_on_fields=(),
+        is_value_comparison=False,
+        verbose=False,
 ):
     """Combine results into a report.
 
@@ -149,14 +149,14 @@ def _calculate_difference(field_differences, datatype, validation, is_value_comp
         difference = (target_value - source_value).cast("float64")
 
         pct_difference_nonzero = (
-            ibis.literal(100.0)
-            * difference
-            / (
-                source_value.case()
-                .when(ibis.literal(0), target_value)
-                .else_(source_value)
-                .end()
-            ).cast("float64")
+                ibis.literal(100.0)
+                * difference
+                / (
+                    source_value.case()
+                    .when(ibis.literal(0), target_value)
+                    .else_(source_value)
+                    .end()
+                ).cast("float64")
         ).cast("float64")
 
         # Considers case that source and target agg values can both be 0
@@ -187,7 +187,7 @@ def _calculate_difference(field_differences, datatype, validation, is_value_comp
 
 
 def _calculate_differences(
-    source, target, join_on_fields, validations, is_value_comparison
+        source, target, join_on_fields, validations, is_value_comparison
 ):
     """Calculate differences between source and target fields.
 
@@ -226,7 +226,7 @@ def _calculate_differences(
                     + _calculate_difference(
                         field_differences, field_type, validation, is_value_comparison
                     )
-                ]
+                    ]
             )
     differences_pivot = functools.reduce(
         lambda pivot1, pivot2: pivot1.union(pivot2), differences_pivots
@@ -250,9 +250,9 @@ def _pivot_result(result, join_on_fields, validations, result_type):
             validation = validations[field]
             if validation.primary_keys:
                 primary_keys = (
-                    ibis.literal("{")
-                    + ibis.literal(", ").join(validation.primary_keys)
-                    + ibis.literal("}")
+                        ibis.literal("{")
+                        + ibis.literal(", ").join(validation.primary_keys)
+                        + ibis.literal("}")
                 ).name("primary_keys")
             else:
                 primary_keys = ibis.literal(None).cast("string").name("primary_keys")
@@ -314,7 +314,7 @@ def _join_pivots(source, target, differences, join_on_fields):
             )
 
         group_by_columns = (
-            ibis.literal("{") + ibis.literal(", ").join(join_values) + ibis.literal("}")
+                ibis.literal("{") + ibis.literal(", ").join(join_values) + ibis.literal("}")
         ).name("group_by_columns")
     else:
         group_by_columns = ibis.literal(None).cast("string").name("group_by_columns")
@@ -335,7 +335,7 @@ def _join_pivots(source, target, differences, join_on_fields):
             differences["pct_threshold"],
             differences["validation_status"],
         ]
-    ]
+        ]
     joined = source_difference.join(target, join_keys, how="outer")[
         source_difference["validation_name"],
         source_difference["validation_type"]

@@ -31,7 +31,7 @@ from ibis.expr.types import (  # noqa
     BooleanValue,
     CategoryScalar,
     CategoryValue,
-    ColumnExpr,
+    Column,
     DateColumn,
     DateScalar,
     DateValue,
@@ -78,26 +78,23 @@ from ibis.expr.types import (  # noqa
     PolygonColumn,
     PolygonScalar,
     PolygonValue,
-    ScalarExpr,
+    Scalar,
     StringColumn,
     StringScalar,
     StringValue,
     StructColumn,
     StructScalar,
     StructValue,
-    TableExpr,
+    Table,
     TimeColumn,
     TimeScalar,
     TimestampColumn,
     TimestampScalar,
     TimestampValue,
     TimeValue,
-    ValueExpr,
-    as_value_expr,
+    Value,
     literal,
-    null,
-    param,
-    sequence,
+    null
 )
 
 
@@ -133,18 +130,10 @@ def _unary_op(name, klass, doc=None):
     return f
 
 
-def _between(arg, lower, upper):
-    lower = as_value_expr(lower)
-    upper = as_value_expr(upper)
-
-    op = ms_ops.Between(arg, lower, upper)
-    return op.to_expr()
-
-
 def _binop_expr(name, klass):
     def f(self, other):
         try:
-            other = as_value_expr(other)
+            other = Value(other)
             op = klass(self, other)
             return op.to_expr()
         except (com.IbisTypeError, NotImplementedError):
@@ -162,7 +151,6 @@ _string_value_methods = dict(
 _generic_value_methods = dict(
     isnull=_unary_op('isnull', ms_ops.IsNull),
     notnull=_unary_op('notnull', ms_ops.NotNull),
-    between=_between,
 )
 
 _boolean_column_methods = dict(
@@ -172,4 +160,4 @@ _boolean_column_methods = dict(
 
 _add_methods(ir.BooleanColumn, _boolean_column_methods)
 _add_methods(ir.StringValue, _string_value_methods)
-_add_methods(ir.ValueExpr, _generic_value_methods)
+_add_methods(ir.Expr, _generic_value_methods)

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """ The QueryBuilder for building custom query row|column validation."""
+import ibis
 
 
 class CustomQueryBuilder(object):
@@ -26,14 +27,13 @@ class CustomQueryBuilder(object):
             aggregation_query = agg_type + "(*) as " + agg_type + ","
         else:
             aggregation_query = (
-                agg_type
-                + "("
-                + column_name
-                + ") as "
-                + agg_type
-                + "__"
-                + column_name
-                + ","
+                    agg_type
+                    + "("
+                    + column_name
+                    + ") as "
+                    + agg_type
+                    + "__" + column_name
+                    + ","
             )
         return aggregation_query
 
@@ -41,10 +41,10 @@ class CustomQueryBuilder(object):
         """Return wrapper aggregation query"""
 
         return (
-            aggregate_query[: len(aggregate_query) - 1]
-            + " FROM ("
-            + base_query
-            + ") as base_query"
+                aggregate_query[: len(aggregate_query) - 1]
+                + " FROM ("
+                + base_query
+                + ") as base_query"
         )
 
     def compile_custom_query(self, input_query, client_config):
@@ -114,33 +114,33 @@ class CustomQueryBuilder(object):
         return calculated_columns
 
     def compile_cast_df_fields(
-        self, calculated_columns, input_query, data_frame, client_config
+            self, calculated_columns, input_query, data_frame, client_config
     ):
         """Returns the wrapper cast query for the input query."""
 
         client = client_config["data_client"]._source_type
         query = "SELECT "
         for column in calculated_columns["cast"]:
-            df_column = column[len("cast__") :]
+            df_column = column[len("cast__"):]
             df_column_dtype = data_frame[df_column].dtype.name
             if client == "Teradata" and df_column_dtype != "VARCHAR":
                 query = (
-                    query
-                    + "CAST("
-                    + df_column
-                    + " AS VARCHAR(255))"
-                    + " AS "
-                    + column
-                    + ","
+                        query
+                        + "CAST("
+                        + df_column
+                        + " AS VARCHAR(255))"
+                        + " AS "
+                        + column
+                        + ","
                 )
 
             elif (
-                df_column_dtype != "object"
-                and df_column_dtype != "string"
-                and client != "Teradata"
+                    df_column_dtype != "object"
+                    and df_column_dtype != "string"
+                    and client != "Teradata"
             ):
                 query = (
-                    query + "CAST(" + df_column + " AS string)" + " AS " + column + ","
+                        query + "CAST(" + df_column + " AS string)" + " AS " + column + ","
                 )
             else:
                 query += df_column + " AS " + column + ","
@@ -159,14 +159,14 @@ class CustomQueryBuilder(object):
         query = "SELECT "
         for column in calculated_columns["ifnull"]:
             query = (
-                query
-                + operation
-                + "("
-                + column[len("ifnull__") :]
-                + ",'DEFAULT_REPLACEMENT_STRING')"
-                + " AS "
-                + column
-                + ","
+                    query
+                    + operation
+                    + "("
+                    + column[len("ifnull__"):]
+                    + ",'DEFAULT_REPLACEMENT_STRING')"
+                    + " AS "
+                    + column
+                    + ","
             )
         query = query[: len(query) - 1] + " FROM (" + cast_query + ") AS cast_query"
         return query
@@ -178,14 +178,14 @@ class CustomQueryBuilder(object):
         query = "SELECT "
         for column in calculated_columns["rstrip"]:
             query = (
-                query
-                + operation
-                + "("
-                + column[len("rstrip__") :]
-                + ")"
-                + " AS "
-                + column
-                + ","
+                    query
+                    + operation
+                    + "("
+                    + column[len("rstrip__"):]
+                    + ")"
+                    + " AS "
+                    + column
+                    + ","
             )
         query = query[: len(query) - 1] + " FROM (" + ifnull_query + ") AS ifnull_query"
         return query
@@ -196,13 +196,13 @@ class CustomQueryBuilder(object):
         query = "SELECT "
         for column in calculated_columns["upper"]:
             query = (
-                query
-                + "UPPER("
-                + column[len("upper__") :]
-                + ")"
-                + " AS "
-                + column
-                + ","
+                    query
+                    + "UPPER("
+                    + column[len("upper__"):]
+                    + ")"
+                    + " AS "
+                    + column
+                    + ","
             )
         query = query[: len(query) - 1] + " FROM (" + rstrip_query + ") AS rstrip_query"
         return query
@@ -217,10 +217,10 @@ class CustomQueryBuilder(object):
             for column in calculated_columns["upper"]:
                 query += column + ","
             query = (
-                query[: len(query) - 1]
-                + ") AS concat__all FROM("
-                + upper_query
-                + ") AS upper_query"
+                    query[: len(query) - 1]
+                    + ") AS concat__all FROM("
+                    + upper_query
+                    + ") AS upper_query"
             )
         elif client == "BigQuery":
             operation = "ARRAY_TO_STRING"
@@ -228,10 +228,10 @@ class CustomQueryBuilder(object):
             for column in calculated_columns["upper"]:
                 query += column + ","
             query = (
-                query[: len(query) - 1]
-                + "],',') AS concat__all FROM("
-                + upper_query
-                + ") AS upper_query"
+                    query[: len(query) - 1]
+                    + "],',') AS concat__all FROM("
+                    + upper_query
+                    + ") AS upper_query"
             )
         elif client == "Teradata":
             operation = ""
@@ -239,10 +239,10 @@ class CustomQueryBuilder(object):
             for column in calculated_columns["upper"]:
                 query += column + " || "
             query = (
-                query[: len(query) - 3]
-                + ") AS concat__all FROM("
-                + upper_query
-                + ") AS upper_query"
+                    query[: len(query) - 3]
+                    + ") AS concat__all FROM("
+                    + upper_query
+                    + ") AS upper_query"
             )
 
         return query
@@ -254,28 +254,28 @@ class CustomQueryBuilder(object):
         if client == "Impala":
             operation = "SHA2"
             query = (
-                "SELECT  "
-                + operation
-                + "(concat__all,256) AS hash__all FROM ("
-                + concat_query
-                + ") AS concat_query"
+                    "SELECT  "
+                    + operation
+                    + "(concat__all,256) AS hash__all FROM ("
+                    + concat_query
+                    + ") AS concat_query"
             )
         elif client == "BigQuery":
             operation = "TO_HEX"
             query = (
-                "SELECT  "
-                + operation
-                + "(SHA256(concat__all)) AS hash__all FROM ("
-                + concat_query
-                + ") AS concat_query"
+                    "SELECT  "
+                    + operation
+                    + "(SHA256(concat__all)) AS hash__all FROM ("
+                    + concat_query
+                    + ") AS concat_query"
             )
         elif client == "Teradata":
             operation = "hash_sha256"
             query = (
-                "SELECT  "
-                + operation
-                + "(concat__all) AS hash__all FROM ("
-                + concat_query
-                + ") AS concat_query"
+                    "SELECT  "
+                    + operation
+                    + "(concat__all) AS hash__all FROM ("
+                    + concat_query
+                    + ") AS concat_query"
             )
         return query

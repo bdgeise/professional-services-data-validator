@@ -16,7 +16,7 @@ import copy
 import logging
 
 import google.oauth2.service_account
-from ibis_bigquery.client import BigQueryClient
+import ibis_bigquery
 
 from data_validation import clients, consts, state_manager
 from data_validation.result_handlers.bigquery import BigQueryResultHandler
@@ -509,8 +509,8 @@ class ConfigManager(object):
             calc_func = "length"
 
         elif column_type == "timestamp":
-            if isinstance(self.source_client, BigQueryClient) or isinstance(
-                self.target_client, BigQueryClient
+            if isinstance(self.source_client.database_class, ibis_bigquery.Backend) or isinstance(
+                self.target_client, ibis_bigquery.Backend
             ):
                 calc_func = "cast"
                 cast_type = "timestamp"

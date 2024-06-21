@@ -18,6 +18,7 @@ from data_validation import data_validation
 import flask
 import pandas
 import logging
+import numpy as np
 
 app = flask.Flask(__name__)
 
@@ -28,6 +29,8 @@ def _clean_dataframe(df):
         for key in row:
             if type(row[key]) in [pandas.Timestamp]:
                 row[key] = str(row[key])
+            if type(row[key]) in [np.ndarray]:  # label is stored as a nparray
+                row[key] = row[key].tolist()
 
     return json.dumps(rows)
 

@@ -284,7 +284,9 @@ class DataValidation(object):
         self.run_metadata.validations = validation_builder.get_metadata()
 
         source_query = validation_builder.get_source_query()
+        logging.debug(f"Source query {source_query}")
         target_query = validation_builder.get_target_query()
+        logging.debug(f"Target query {target_query}")
 
         join_on_fields = (
             set(validation_builder.get_primary_keys())
@@ -307,8 +309,18 @@ class DataValidation(object):
         )
 
         if process_in_memory:
-            source_df = self.config_manager.source_client.execute(source_query)
-            target_df = self.config_manager.target_client.execute(target_query)
+            if self.config_manager.validation_type == consts.CUSTOM_QUERY:
+                with self.config_manager.source_client._safe_raw_sql(source_query) as cur:
+                    schema = self.config_manager.source_client._get_schema_using_query(source_query)
+                    source_df = self.config_manager.source_client.fetch_from_cursor(cur, schema)
+
+                with self.config_manager.target_client._safe_raw_sql(target_query) as cur:
+                    schema = self.config_manager.target_client._get_schema_using_query(target_query)
+                    target_df = self.config_manager.target_client.fetch_from_cursor(cur, schema)
+
+            else:
+                source_df = self.config_manager.source_client.execute(source_query)
+                target_df = self.config_manager.target_client.execute(target_query)
 
             # Drop excess fields for row validation to avoid pandas errors for unsupported column data types (i.e structs)
             if (
@@ -330,7 +342,7 @@ class DataValidation(object):
                 source_df, target_df, join_on_fields, verbose=self.verbose
             )
 
-            pandas_client = ibis.backends.pandas.connect(
+            pandas_client = ibis.pandas.connect(
                 {combiner.DEFAULT_SOURCE: source_df, combiner.DEFAULT_TARGET: target_df}
             )
 
@@ -338,8 +350,8 @@ class DataValidation(object):
                 result_df = combiner.generate_report(
                     pandas_client,
                     self.run_metadata,
-                    pandas_client.table(combiner.DEFAULT_SOURCE, schema=pd_schema),
-                    pandas_client.table(combiner.DEFAULT_TARGET, schema=pd_schema),
+                    pandas_client.table(combiner.DEFAULT_SOURCE),
+                    pandas_client.table(combiner.DEFAULT_TARGET),
                     join_on_fields=join_on_fields,
                     is_value_comparison=is_value_comparison,
                     verbose=self.verbose,

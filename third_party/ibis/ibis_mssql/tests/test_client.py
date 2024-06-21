@@ -12,15 +12,15 @@ sa = pytest.importorskip('sqlalchemy')
 
 pytestmark = pytest.mark.mssql
 
-MSSQL_USER = os.environ.get('IBIS_TEST_MSSQL_USER', 'user')
-MSSQL_PASS = os.environ.get('IBIS_TEST_MSSQL_PASSWORD', 'pass')
-MSSQL_HOST = os.environ.get('IBIS_TEST_MSSQL_HOST', 'host')
-MSSQL_PORT = os.environ.get('IBIS_TEST_MSSQL_PORT', 'port')
-MSSQL_DB = os.environ.get('IBIS_TEST_MSSQL_DATABASE', 'db_name')
+MSSQL_USER = os.environ.get('IBIS_TEST_MSSQL_USER', 'SA')
+MSSQL_PASS = os.environ.get('IBIS_TEST_MSSQL_PASSWORD', 'Password1')
+MSSQL_HOST = os.environ.get('IBIS_TEST_MSSQL_HOST', 'localhost')
+MSSQL_PORT = os.environ.get('IBIS_TEST_MSSQL_PORT', 1433)
+MSSQL_DB = os.environ.get('IBIS_TEST_MSSQL_DATABASE', 'ibis_testing')
 
 
 def test_table(alltypes):
-    assert isinstance(alltypes, ir.TableExpr)
+    assert isinstance(alltypes, ir.Table)
 
 
 def test_array_execute(alltypes):
@@ -42,34 +42,28 @@ def test_simple_aggregate_execute(alltypes):
     assert isinstance(v, float)
 
 
+def test_string_contains(batting):
+    d = batting.playerID.contains("abe")
+    v = d.execute()
+    assert isinstance(v, float)
+
+
 def test_list_tables(con):
     assert len(con.list_tables()) > 0
     assert len(con.list_tables(like='functional')) == 1
 
 
 def test_compile_verify(alltypes):
-    unsupported_expr = alltypes.double_col.approx_median()
-    assert not unsupported_expr.verify()
+    with pytest.raises(Exception) as e_info:
+        x = alltypes.double_col.approx_median()
+        x.compile()
 
     supported_expr = alltypes.double_col.sum()
-    assert supported_expr.verify()
-
-
-def test_database_layer(con, alltypes):
-    db = con.database()
-    t = db.functional_alltypes
-
-    assert_equal(t, alltypes)
-
-    assert db.list_tables() == con.list_tables()
-
-    db_schema = con.schema("INFORMATION_SCHEMA")
-
-    assert db_schema.list_tables() != con.list_tables()
+    assert supported_expr.compile()
 
 
 def test_compile_toplevel():
-    t = ibis.table([('foo', 'double')], name='t0')
+    t = ibis.table([('foo', 'double'), ("s", "string")], name='t0')
 
     # it works!
     expr = t.foo.sum()
@@ -78,6 +72,8 @@ def test_compile_toplevel():
 
     assert str(result) == expected
 
+    result = third_party.ibis.ibis_mssql.compile(t.s.contains("x"))
+    print(result)
 
 def test_list_databases(con):
     assert MSSQL_DB is not None
@@ -90,7 +86,7 @@ def test_list_schemas(con):
 
 
 def test_metadata_is_per_table():
-    con = third_party.ibis.ibis_mssql.api.connect(
+    con = third_party.ibis.ibis_mssql.connect(
         host=MSSQL_HOST,
         database=MSSQL_DB,
         user=MSSQL_USER,
@@ -103,22 +99,6 @@ def test_metadata_is_per_table():
     t = con.table('functional_alltypes')  # noqa
     assert 'functional_alltypes' in con.meta.tables
     assert len(con.meta.tables) == 1
-
-
-def test_schema_table():
-    con = third_party.ibis.ibis_mssql.api.connect(
-        host=MSSQL_HOST,
-        database=MSSQL_DB,
-        user=MSSQL_USER,
-        password=MSSQL_PASS,
-        port=MSSQL_PORT,
-    )
-
-    # ensure that we can reflect the information schema (which is guaranteed
-    # to exist)
-    schema = con.schema('dbo')
-
-    assert isinstance(schema['functional_alltypes'], ir.TableExpr)
 
 
 @pytest.mark.parametrize('params', [{}, {'database': MSSQL_DB}])

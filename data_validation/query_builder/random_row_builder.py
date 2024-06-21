@@ -18,10 +18,10 @@ import ibis
 import ibis.expr.operations as ops
 import ibis.expr.types as tz
 import ibis.expr.rules as rlz
-import ibis.backends.base_sqlalchemy.compiler as sql_compiler
-from ibis_bigquery import BigQueryClient
-from ibis.backends.impala.client import ImpalaClient
-from ibis.backends.pandas.client import PandasClient
+import ibis.backends.base.sql.compiler as sql_compiler
+import ibis_bigquery
+import ibis.backends.impala as impala
+import ibis.backends.pandas as pandas
 import ibis.backends.pandas.execution.util as pandas_util
 
 from ibis.expr.signature import Argument as Arg
@@ -29,11 +29,11 @@ from typing import List
 from data_validation import clients
 from io import StringIO
 
-try:
-    from third_party.ibis.ibis_teradata.client import TeradataClient
-except Exception:
-    msg = "pip install teradatasql (requires Teradata licensing)"
-    TeradataClient = clients._raise_missing_client_error(msg)
+# try:
+#     from third_party.ibis.ibis_teradata.client import TeradataClient
+# except Exception:
+#     msg = "pip install teradatasql (requires Teradata licensing)"
+#     TeradataClient = clients._raise_missing_client_error(msg)
 
 """ The QueryBuilder for retreiving random row values to filter against."""
 
@@ -47,9 +47,9 @@ except Exception:
 ### out to dhercher
 ######################################
 RANDOM_SORT_SUPPORTS = {
-    PandasClient: "NA",
-    BigQueryClient: "RAND()",
-    ImpalaClient: "RAND()",
+    pandas.Backend.name: "NA",
+    ibis_bigquery.Backend.name: "RAND()",
+    impala.Backend.name: "RAND()",
 }
 
 
@@ -90,7 +90,7 @@ class RandomRowBuilder(object):
         self.batch_size = batch_size
 
     def compile(
-        self, data_client: ibis.client, schema_name: str, table_name: str
+        self, data_client: ibis.BaseBackend, schema_name: str, table_name: str
     ) -> ibis.Expr:
         """Return an Ibis query object
 
@@ -106,20 +106,20 @@ class RandomRowBuilder(object):
         return query
 
     def maybe_add_random_sort(
-        self, data_client: ibis.client, table: ibis.Expr
+        self, data_client: ibis.BaseBackend, table: ibis.Expr
     ) -> ibis.Expr:
         """Return a randomly sorted query if it is supported for the client."""
-        if type(data_client) in RANDOM_SORT_SUPPORTS:
+        if data_client.name in RANDOM_SORT_SUPPORTS:
             return table.sort_by(
-                RandomSortKey(RANDOM_SORT_SUPPORTS[type(data_client)]).to_expr()
+                RandomSortKey(RANDOM_SORT_SUPPORTS[data_client.name]).to_expr()
             )
-
-        if type(data_client) != TeradataClient:
-            # Teradata 'SAMPLE' is random by nature and does not require a sort by
-            logging.warning(
-                "Data Client %s Does Not Enforce Random Sort on Sample",
-                str(type(data_client)),
-            )
+        #
+        # if type(data_client) != TeradataClient:
+        #     # Teradata 'SAMPLE' is random by nature and does not require a sort by
+        #     logging.warning(
+        #         "Data Client %s Does Not Enforce Random Sort on Sample",
+        #         str(type(data_client)),
+        #     )
         return table
 
 

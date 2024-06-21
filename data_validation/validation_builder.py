@@ -195,6 +195,8 @@ class ValidationBuilder(object):
             primary_keys=self.config_manager.get_primary_keys_list(),
             num_random_rows=self.config_manager.get_random_row_batch_size(),
             threshold=self.config_manager.threshold,
+            source_custom_query=self.config_manager.source_query_file,
+            target_custom_query = self.config_manager.target_query_file
         )
 
     def pop_grouped_fields(self):
@@ -376,7 +378,7 @@ class ValidationBuilder(object):
                         source_aggregate_query, source_input_query
                     )
                 )
-                query = self.source_client.sql(source_aggregate_query)
+                query = source_aggregate_query
             else:
                 raise ValueError(
                     "Expected custom query type to be column or row, got an unacceptable value. "
@@ -387,7 +389,7 @@ class ValidationBuilder(object):
         if self.verbose:
             logging.info(source_config)
             logging.info("-- ** Source Query ** --")
-            logging.info(query.compile())
+            logging.info(query if self.validation_type == consts.CUSTOM_QUERY else query.compile())
 
         return query
 
@@ -420,7 +422,7 @@ class ValidationBuilder(object):
                         target_aggregate_query, target_input_query
                     )
                 )
-                query = self.target_client.sql(target_aggregate_query)
+                query = target_aggregate_query
             else:
                 raise ValueError(
                     "Expected custom query type to be column or row, got an unacceptable value. "
@@ -431,7 +433,7 @@ class ValidationBuilder(object):
         if self.verbose:
             logging.info(target_config)
             logging.info("-- ** Target Query ** --")
-            logging.info(query.compile())
+            logging.info(query if self.validation_type == consts.CUSTOM_QUERY else query.compile())
 
         return query
 

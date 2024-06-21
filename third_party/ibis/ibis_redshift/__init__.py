@@ -14,27 +14,22 @@
 
 
 import contextlib
-import getpass
+from ibis import util
 import logging
 
 import sqlalchemy as sa
 
-import sqlalchemy.dialects.mssql as mssql
-from ibis import util
-import ibis.expr.types as ir
-import ibis.expr.operations as ops
-import ibis.expr.datatypes as dt
+from typing import Literal
 from ibis.backends.base.sql.alchemy import BaseAlchemyBackend
 from ibis.backends.base import BaseBackend
 import ibis.expr.schema as sch
-from third_party.ibis.ibis_mssql.compiler import MSSQLCompiler
-
-import pyodbc  # NOQA fail early if the driver is missing
-
+from ibis.backends.postgres.compiler import PostgreSQLCompiler
+from ibis.backends.postgres.datatypes import _get_type
+import sqlalchemy_redshift
 
 class Backend(BaseAlchemyBackend):
-    name = "mssql"
-    compiler = MSSQLCompiler
+    name = "redshift"
+    compiler = PostgreSQLCompiler
     database_name = None
 
     def do_connect(
@@ -42,33 +37,28 @@ class Backend(BaseAlchemyBackend):
         host='localhost',
         user=None,
         password=None,
-        port=1433,
-        database='master',
+        port=5432,
+        database=None,
         url=None,
-        driver='pyodbc',
-        odbc_driver='ODBC Driver 17 for SQL Server',
+        driver: Literal["psycopg2"] = "psycopg2",
     ) -> None:
         """Create a :class:`Backend` for use with Ibis.
         """
-        if url is None:
-            if driver != 'pyodbc':
-                raise NotImplementedError(
-                    'pyodbc is currently the only supported driver'
-                )
-            user = user or getpass.getuser()
-            url = sa.engine.url.URL.create(
-                'mssql+pyodbc',
-                host=host,
-                port=port,
-                username=user,
-                password=password,
-                database=database,
-                query={'driver': odbc_driver},
+        if driver != 'psycopg2':
+            raise NotImplementedError(
+                'psycopg2 is currently the only supported driver'
             )
-        else:
-            url = sa.engine.url.make_url(url)
-        self.database_name = url.database
-        super().do_connect(sa.create_engine(url))
+        alchemy_url = self._build_alchemy_url(
+            url=url,
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database,
+            driver=f'postgresql+{driver}',
+        )
+        self.database_name = alchemy_url.database
+        super().do_connect(sa.create_engine(alchemy_url))
 
     @contextlib.contextmanager
     def begin(self):
@@ -98,56 +88,38 @@ class Backend(BaseAlchemyBackend):
             ' database, use client.database({!r})'.format(name)
         )
 
-    def _get_schema_using_query(self, query: str):
-        type_map = {
-            'int': 'int64',
-            'bool': 'boolean',
-            'float': 'float64',
-            'str': 'string',
-            'datetime': 'timestamp',
-        }
-
+    def _get_schema_using_query(self, query: str) -> sch.Schema:
         raw_name = util.guid()
         name = self.con.dialect.identifier_preparer.quote_identifier(raw_name)
         type_info_sql = f"""\
-        SELECT
-          COLUMN_NAME,
-          DATA_TYPE
-        FROM information_schema.columns
-        WHERE table_name = '{raw_name}'
-        ORDER BY COLUMN_NAME
-        """
+SELECT
+  attname,
+  format_type(atttypid, atttypmod) AS type
+FROM pg_attribute
+WHERE attrelid = {raw_name!r}::regclass
+  AND attnum > 0
+  AND NOT attisdropped
+ORDER BY attnum
+"""
         with self.con.connect() as con:
             con.execute(f"CREATE VIEW {name} AS {query}")
             try:
                 type_info = con.execute(type_info_sql).fetchall()
             finally:
                 con.execute(f"DROP VIEW {name}")
-        tuples = [(col, type_map[typestr]) for col, typestr in type_info]
+        tuples = [(col, _get_type(typestr)) for col, typestr in type_info]
         return sch.Schema.from_tuples(tuples)
 
-    def sql(self, query: str) -> ir.Table:
-        """Convert a SQL query to an Ibis table expression.
-
-        Parameters
-        ----------
-        query
-            SQL string
-
-        Returns
-        -------
-        Table
-            Table expression
-        """
-        # Get the schema by adding a TOP 0 on to the end of the query. If
-        # there is already a limit in the query, we find and remove it
-        limited_query = f'SELECT TOP 0 * FROM ({query}) t0'
-        schema = self._get_schema_using_query(limited_query)
-        return ops.SQLQueryResult(query, schema, self).to_expr()
+    def _get_temp_view_definition(
+            self,
+            name: str,
+            definition: sa.sql.compiler.Compiled,
+    ) -> str:
+        return f"CREATE OR REPLACE TEMPORARY VIEW {name} AS {definition}"
 
 
 def compile(expr, params=None, **kwargs):
-    """Compile an expression for MSSQL.
+    """Compile an expression for Redshift.
     Returns
     -------
     compiled : str
@@ -160,14 +132,13 @@ def compile(expr, params=None, **kwargs):
 
 
 def connect(
-    host='localhost',
-    user=None,
-    password=None,
-    port=1433,
-    database='master',
-    driver='pyodbc',
-    odbc_driver='ODBC Driver 17 for SQL Server',
-    url=None,
+        host='localhost',
+        user=None,
+        password=None,
+        port=5432,
+        database=None,
+        url=None,
+        driver: Literal["psycopg2"] = "psycopg2",
 ) -> BaseBackend:
     """Create a :class:`Backend` for use with Ibis.
     Parameters
@@ -175,13 +146,12 @@ def connect(
     host : string, default 'localhost'
     user : string, optional
     password : string, optional
-    port : string or integer, default 1433
-    database : string, default 'master'
+    port : string or integer, default 5432
+    database : string
     url : string, optional
         Complete SQLAlchemy connection string. If passed, the other connection
         arguments are ignored.
-    driver : string, default 'pyodbc'
-    odbc_driver : string, default 'ODBC Driver 17 for SQL Server'
+    driver : string, default 'psycopg2'
 
     Returns
     -------
@@ -196,16 +166,6 @@ def connect(
         database=database,
         url=url,
         driver=driver,
-        odbc_driver=odbc_driver,
     )
     return backend
 
-
-@dt.dtype.register(mssql.UNIQUEIDENTIFIER)
-def sa_string(satype, nullable=True):
-    return dt.String(nullable=nullable)
-
-
-@dt.dtype.register(mssql.BIT)
-def sa_boolean(satype, nullable=True):
-    return dt.Boolean(nullable=nullable)

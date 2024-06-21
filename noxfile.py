@@ -151,7 +151,7 @@ def integration_postgres(session):
     session.run("pytest", test_path, *session.posargs)
 
 
-@nox.session(python=random.choice(PYTHON_VERSIONS), venv_backend="venv")
+@nox.session(python=DEFAULT_PYTHON_VERSION, venv_backend="venv")
 def integration_sql_server(session):
     """Run SQL Server integration tests.
     Ensure SQL Server validation is running as expected.
